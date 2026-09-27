@@ -1,0 +1,63 @@
+### 1. Create one category
+POST http://localhost:8080/api/categories
+Authorization: Basic admin admin123
+Content-Type: application/json
+
+{
+  "name": "Electronics",
+  "description": "Electronic gadgets and devices"
+}
+
+> {%
+    client.test("Category created successfully", function() {
+        client.assert(response.status === 201, "Expected status code 201");
+    });
+%}
+
+### 2. Show all categories
+GET http://localhost:8080/api/categories
+Authorization: Basic admin admin123
+Accept: application/json
+
+> {%
+    client.test("All categories fetched successfully", function() {
+        client.assert(response.status === 200, "Expected status code 200");
+    });
+%}
+
+### 3. Read one category
+GET http://localhost:8080/api/categories/1
+Authorization: Basic admin admin123
+Accept: application/json
+
+> {%
+    client.test("Single category fetched successfully", function() {
+        client.assert(response.status === 200, "Expected status code 200");
+    });
+%}
+
+### 4. Update one category
+PUT http://localhost:8080/api/categories/1
+Authorization: Basic admin admin123
+Content-Type: application/json
+
+{
+  "name": "Updated Electronics",
+  "description": "Updated category description"
+}
+
+> {%
+    client.test("Category updated successfully", function() {
+        client.assert(response.status === 200, "Expected status code 200");
+    });
+%}
+
+### 5. Delete one category
+DELETE http://localhost:8080/api/categories/1
+Authorization: Basic admin admin123
+
+> {%
+    client.test("Category deleted successfully", function() {
+        client.assert(response.status === 204, "Expected status code 204");
+    });
+%}
