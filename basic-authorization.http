@@ -1,6 +1,28 @@
-### 1. Create one category
+### 1. [USER] Read all categories - Allowed (200 OK)
+GET http://localhost:8080/api/categories
+Authorization: Basic user user123
+Accept: application/json
+
+> {%
+    client.test("USER: Read categories allowed", function() {
+        client.assert(response.status === 200, "Expected status code 200");
+    });
+%}
+
+### 2. [USER] Read all products - Allowed (200 OK)
+GET http://localhost:8080/api/products
+Authorization: Basic user user123
+Accept: application/json
+
+> {%
+    client.test("USER: Read products allowed", function() {
+        client.assert(response.status === 200, "Expected status code 200");
+    });
+%}
+
+### 3. [USER] Attempt to create category - Forbidden (403 Forbidden)
 POST http://localhost:8080/api/categories
-Authorization: Basic admin admin123
+Authorization: Basic user user123
 Content-Type: application/json
 
 {
@@ -9,55 +31,100 @@ Content-Type: application/json
 }
 
 > {%
-    client.test("Category created successfully", function() {
+    client.test("USER: Create category forbidden", function() {
+        client.assert(response.status === 403, "Expected status code 403");
+    });
+%}
+
+### 4. [USER] Attempt to delete product - Forbidden (403 Forbidden)
+DELETE http://localhost:8080/api/products/1
+Authorization: Basic user user123
+
+> {%
+    client.test("USER: Delete product forbidden", function() {
+        client.assert(response.status === 403, "Expected status code 403");
+    });
+%}
+
+### 5. [MANAGER] Create category - Allowed (201 Created)
+POST http://localhost:8080/api/categories
+Authorization: Basic manager manager123
+Content-Type: application/json
+
+{
+  "name": "Smartphones",
+  "description": "Mobile phones and accessories"
+}
+
+> {%
+    client.test("MANAGER: Create category allowed", function() {
         client.assert(response.status === 201, "Expected status code 201");
     });
 %}
 
-### 2. Show all categories
-GET http://localhost:8080/api/categories
-Authorization: Basic admin admin123
-Accept: application/json
-
-> {%
-    client.test("All categories fetched successfully", function() {
-        client.assert(response.status === 200, "Expected status code 200");
-    });
-%}
-
-### 3. Read one category
-GET http://localhost:8080/api/categories/1
-Authorization: Basic admin admin123
-Accept: application/json
-
-> {%
-    client.test("Single category fetched successfully", function() {
-        client.assert(response.status === 200, "Expected status code 200");
-    });
-%}
-
-### 4. Update one category
-PUT http://localhost:8080/api/categories/1
-Authorization: Basic admin admin123
+### 6. [MANAGER] Create product - Allowed (201 Created)
+POST http://localhost:8080/api/products
+Authorization: Basic manager manager123
 Content-Type: application/json
 
 {
-  "name": "Updated Electronics",
-  "description": "Updated category description"
+  "name": "iPhone 15",
+  "description": "Latest Apple smartphone",
+  "price": 999.99,
+  "stockQuantity": 50,
+  "categoryId": 1
 }
 
 > {%
-    client.test("Category updated successfully", function() {
-        client.assert(response.status === 200, "Expected status code 200");
+    client.test("MANAGER: Create product allowed", function() {
+        client.assert(response.status === 201, "Expected status code 201");
     });
 %}
 
-### 5. Delete one category
+### 7. [USER] Create order for product 1 - Allowed (201 Created)
+POST http://localhost:8080/api/orders
+Authorization: Basic user user123
+Content-Type: application/json
+
+{
+  "customerName": "Oleksandr",
+  "customerEmail": "alex@example.com",
+  "quantity": 1,
+  "productId": 1
+}
+
+> {%
+    client.test("USER: Create order allowed", function() {
+        client.assert(response.status === 201, "Expected status code 201");
+    });
+%}
+
+### 8. [MANAGER] Attempt to delete category - Forbidden (403 Forbidden)
 DELETE http://localhost:8080/api/categories/1
+Authorization: Basic manager manager123
+
+> {%
+    client.test("MANAGER: Delete category forbidden", function() {
+        client.assert(response.status === 403, "Expected status code 403");
+    });
+%}
+
+### 9. [ADMIN] Delete order - Allowed (204 No Content)
+DELETE http://localhost:8080/api/orders/1
 Authorization: Basic admin admin123
 
 > {%
-    client.test("Category deleted successfully", function() {
+    client.test("ADMIN: Delete order allowed", function() {
         client.assert(response.status === 204, "Expected status code 204");
+    });
+%}
+
+### 10. [UNAUTHENTICATED] Attempt to access orders without auth - Unauthorized (401 Unauthorized)
+GET http://localhost:8080/api/orders
+Accept: application/json
+
+> {%
+    client.test("UNAUTHENTICATED: Access without credentials unauthorized", function() {
+        client.assert(response.status === 401, "Expected status code 401");
     });
 %}
